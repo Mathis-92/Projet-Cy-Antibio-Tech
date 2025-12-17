@@ -1,1 +1,128 @@
 from math import* 
+
+from matplotlib import pyplot as plt
+import math
+import shutil
+import os
+
+chemin_dossier = str(input("Entrez le chemin de l'emplacement où vous voulez créer votre dossier:\n"))
+
+creation_dossier = os.path.join(chemin_dossier, "Projet")
+creation_input = os.path.join ("Projet","input")
+creation_output = os.path.join ("Projet","output")
+creation_images = os.path.join ("Projet","images")
+
+os.makedirs(creation_input,exist_ok=True)
+os.makedirs(creation_output,exist_ok=True)
+os.makedirs(creation_images,exist_ok=True)
+
+chemin_accès = 'r';str(input("Entrez le chemin d'accès de votre fichier de données:\n"))
+shutil.copy2(chemin_accès, 'input')
+
+figure, axis = plt.subplot()
+
+for mouse_number in range (1, 1000):
+    if mouse_number<10:
+        mouse_id = f"ABX00{mouse_number}"
+    elif mouse_number<100:
+        mouse_id = f"ABX0{mouse_number}"
+    else:
+        mouse_id = f"ABX{mouse_number}"
+        
+    
+    
+    x = []
+    y = []
+    
+    
+    fd = open(chemin_accès, "r") #mettre un r devant le chemin d'accès
+    # skip first line
+    line = fd.readline()
+    #retrieve first data line (2nd line)
+    line = fd.readline()
+    while line != '':
+        #remove end of line character
+        line = line.replace("\n", "")
+        data = line.split(";")
+        #filter by mouse ID
+        if data[4] == mouse_id:
+            if data [5] == "ABX":
+                c = 'red'
+            else:
+                c = 'blue'
+            #process only for fecal samples
+            if data[2] == 'fecal':
+                xvalue = float (data[7])
+                yvalue = math.log10(float(data[8]))
+                x.append(xvalue)
+                y.append(yvalue)
+
+        
+        fd2 = open("fichier_sorti.csv","w")
+        valeurs_utiles = [data[4],data[5],data[2],data[7],data[8]]
+        ligne = ','.join(valeurs_utiles)
+        fd2.write(ligne+'\n')
+                
+        line = fd.readline()
+    fd.close()
+    
+    
+    #draw curve
+    axis.plot(x, y, color = c)
+
+figure.savefig("images.png", dpi=200)
+
+
+
+
+
+
+from matplotlib import pyplot as plt
+import math
+
+
+figure, axis = plt.subplot()
+
+cecal_abx = []
+cecal_plb = []
+ileal_abx = []
+ileal_plb = []
+
+fd= open(#A COMPLETER, "r")
+# skip first line
+line = fd.readline()
+#retrieve first data line (2nd line)
+line = fd.readline()
+while line != '':
+    #remove end of line character
+    line = line.replace("\n","")
+    data = line.split (";")
+    
+    #process only for cecal samples
+    if data [2] == 'cecal':
+        value = math.log10(float(data[8]))
+        if data[5] == "ABX":
+            cecal_abx.append(value)
+        else:
+            cecal_plb.append(value)
+            
+    #process only for ileal samples
+    if data [2] == 'ileal':
+        value = math.log10(float(data[8]))
+        if data[5] == "ABX":
+            ileal_abx.append(value)
+        else:
+            ileal_plb.append(value)
+            
+    line = fd.readline()
+
+fd.close()
+
+print(cecal_abx)
+print(cecal_plb)
+
+#draw curve
+axis.violinplot([cecal_abx, cecal_plb, ileal_abx, ileal_plb])
+    
+
+figure.savefig("out.png", dpi=200)
